@@ -1,3 +1,5 @@
+
+
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.event.ComponentEvent;
@@ -30,8 +32,10 @@ public class MySlider extends JPanel implements MouseMotionListener, ComponentLi
 	private final boolean ADJUST_BUTTON_WIDTH = false;
 	private final int MY_BUTTON_DEFAULT_WIDTH = 10;
 	
+	private Screen scr;
 	private JButton myButton;
 	private int startValue;
+	private int endValue;
 	private int capacity;
 	/**
 	 * Draw hairstrokes or not.
@@ -49,11 +53,19 @@ public class MySlider extends JPanel implements MouseMotionListener, ComponentLi
 	 * Distance between two hairstrokes.
 	 */
 	private float dX;
-	private int mouseX;
+	/**
+	 * Needs to calculate slider's value after MyButton moving.<br>
+	 * 1 - if startValue > endValue <br>
+	 * -1 - if startValue < endValue <br>
+	 */
 	private int incOrDec = 1;
+	private int mouseX;
+	private boolean enabled = true;
 	
 	public MySlider(int startValue, int endValue) {
+		this.scr = scr;
 		this.startValue = startValue;
+		this.endValue = endValue;
 		setBackground(BACKGROUND_COLOR);
 		setLayout(null);
 		capacity = endValue - startValue;
@@ -62,6 +74,7 @@ public class MySlider extends JPanel implements MouseMotionListener, ComponentLi
 				incOrDec = -1;
 			}
 		myButton = new JButton();
+		myButton.setFocusable(false);
 		add(myButton);
 		addMouseMotionListener(this);
 		addMouseListener(this);
@@ -77,7 +90,7 @@ public class MySlider extends JPanel implements MouseMotionListener, ComponentLi
 		int y = getLineY() - height/2;
 		value = startValue;
 		myButton.setBounds(x, y, width, height);
-		myButton.repaint();
+//		myButton.repaint();
 	}
 	
 	private int setUpMyButtonWidth() {
@@ -139,25 +152,18 @@ public class MySlider extends JPanel implements MouseMotionListener, ComponentLi
 		}
 		
 	}
-	
-	public String valueString(){
-		return Integer.toString(value);
-	}
-		public Integer valueInteger(){
-			return value;
-		}
 
 	private void connectMouseXtoHairstrokeX() {
-		for (Integer hairstrokeX : hsXX) {
-			if (mouseX >= hairstrokeX-dX/2
-					&& mouseX < hairstrokeX+dX/2){
-				value = startValue+incOrDec*hsXX.indexOf(hairstrokeX);
-				// THIS IS THE PLACE TO CATCH SLIDER's VALUE
-				// I.E.: scr.lbl2.setText(valueString());
-				myButton.setLocation(hairstrokeX-myButton.getWidth()/2, myButton.getY());
-				myButton.repaint();
+		if (enabled)
+			for (Integer hairstrokeX : hsXX) {
+				if (mouseX >= hairstrokeX-dX/2
+						&& mouseX < hairstrokeX+dX/2){
+					value = startValue+incOrDec*hsXX.indexOf(hairstrokeX);
+					// THIS IS THE PLACE TO CATCH SLIDER's VALUE
+					// I.E.: scr.lbl2.setText(valueString());
+					myButton.setLocation(hairstrokeX-myButton.getWidth()/2, myButton.getY());
+				}
 			}
-		}
 	}
 
 	@Override
@@ -185,13 +191,40 @@ public class MySlider extends JPanel implements MouseMotionListener, ComponentLi
 	}
 
 	@Override
+	public void mouseReleased(MouseEvent e) {}
+	public void mouseEntered(MouseEvent e) {}
+	public void mouseExited(MouseEvent e) {}
+	public void mousePressed(MouseEvent e) {}
 	public void mouseClicked(MouseEvent e) {
 		if (e.getSource().equals(this)){
 			connectMouseXtoHairstrokeX();
 		}
 	}
-	public void mouseReleased(MouseEvent e) {}
-	public void mouseEntered(MouseEvent e) {}
-	public void mouseExited(MouseEvent e) {}
-	public void mousePressed(MouseEvent e) {}
+	
+	public String valueToString(){
+		return Integer.toString(value);
+	}
+		public Integer valueToInteger(){
+			return value;
+		}
+		
+	public void setEnabled(boolean b){
+		enabled = b;
+		myButton.setEnabled(enabled);
+	}
+		public boolean isEnabled(){
+			return enabled;
+		}
+	
+	public void setValue(int newValue){
+		if ((newValue < startValue && newValue < endValue)
+			|| (newValue > startValue && newValue > endValue))
+				System.out.println("New value is out of the MySlider's range");
+		else{
+			value = newValue;
+			int dValue = newValue - startValue;
+				dValue = (dValue < 0)? -dValue:dValue;
+			myButton.setLocation((int)(hsXX.get(0)+dX*dValue-myButton.getWidth()/2), myButton.getY());
+		}
+	}
 }
