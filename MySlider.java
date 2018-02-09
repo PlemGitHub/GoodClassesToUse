@@ -1,4 +1,4 @@
-
+package Visual;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -62,7 +62,7 @@ public class MySlider extends JPanel implements MouseMotionListener, ComponentLi
 	private int mouseX;
 	private boolean enabled = true;
 	
-	public MySlider(int startValue, int endValue) {
+	public MySlider(int startValue, int endValue, Screen scr) {
 		this.scr = scr;
 		this.startValue = startValue;
 		this.endValue = endValue;
@@ -161,6 +161,7 @@ public class MySlider extends JPanel implements MouseMotionListener, ComponentLi
 					value = startValue+incOrDec*hsXX.indexOf(hairstrokeX);
 					// THIS IS THE PLACE TO CATCH SLIDER's VALUE
 					// I.E.: scr.lbl2.setText(valueString());
+					scr.lvlLbl.setText("Уровень "+valueToString());
 					myButton.setLocation(hairstrokeX-myButton.getWidth()/2, myButton.getY());
 				}
 			}
